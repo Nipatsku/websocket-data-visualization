@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Real-time voltage monitoring</title>
+    <meta charset="utf-8" />
+
+    <!-- Flexbox styling to have the chart and header fill the page.
+        Chart will take as much space as possible. -->
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #chart {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body class="box">
+    <div id="chart" class="row content"></div>
+    <script src="lcjs.iife.js"></script>
+    <script>
+    </script>
+    <script>
+        const {
+            lightningChart,
+            emptyFill,
+            SolidFill,
+            ColorHEX,
+            SolidLine,
+            AxisTickStrategies,
+            AxisScrollStrategies,
+        } = lcjs
+
+        const dateOrigin = new Date()
+
+        if (! window.WebSocket) {
+            alert('Websocket not supported by browser.')
+        } else {
+            const socket = new WebSocket('ws://localhost:8081');
+            socket.addEventListener('open', () => {
+                console.log('open')
+            })
+            socket.addEventListener('close', () => {
+                console.log('close')
+            })
+            socket.onmessage = (e) => {
+                let msg = JSON.parse(e.data)
+
+                if (msg.id === 'info') {
+                    const { channels, timeDomain } = msg
+                    const dashboard = lightningChart().Dashboard({
+                        container: 'chart',
+                        numberOfColumns: 1,
+                        numberOfRows: channels.length
+                    })
+
+                    const charts = channels.map((channel, iChannel) => {
+                        const chart = dashboard.createChartXY({
+                            columnIndex: 0,
+                            rowIndex: iChannel
+                        })
+                            .setTitle('')
+                            .setMouseInteractions(false)
+                        if (iChannel > 0) chart.setTitleFillStyle(emptyFill)
+
+                        const axisX = chart.getDefaultAxisX()
+                        if (iChannel < channels.length - 1)
+                            axisX
+                                .setTickStrategy(AxisTickStrategies.Empty)
+                                .setScrollStrategy(undefined)
+                                .setMouseInteractions(false)
+                        else
+                            axisX.setTickStrategy(AxisTickStrategies.DateTime, (ticks) => ticks
+                                .setDateOrigin(dateOrigin)
+                            )
+                            .setScrollStrategy(AxisScrollStrategies.progressive)
+                            .setInterval(-timeDomain, 0)
+                            .setTitle('Time domain')
+
+                        const axisY = chart.getDefaultAxisY()
+                        if ('name' in channel)
+                            axisY
+                                .setTitle(channel.name)
+                                .setTitleFont((font) => font.setSize(10))
+
+                        return chart
+                    })
+
+                    charts[charts.length - 1].getDefaultAxisX().onScaleChange((start, end) => 
+                        charts.forEach((chart, iChannel) => {
+                            if (iChannel < charts.length - 1) {
+                                chart.getDefaultAxisX().setInterval(start, end, false, false)
+                            }
+                        })
+                    )
+
+                    const series = charts.map((chart, iChannel) => {
+                        const channel = channels[iChannel]
+                        const nSeries = chart.addLineSeries({
+                            dataPattern: {
+                                pattern: 'progressiveX',
+                            }
+                        })
+                            .setMaxPointCount(timeDomain * 2)
+                        if ('name' in channel) nSeries.setName(channel.name)
+                        if ('color' in channel) nSeries.setStrokeStyle((style) => style.setFillStyle(new SolidFill({color: ColorHEX(channel.color)})))
+                        return nSeries
+                    })
+
+                    let tFirstData
+                    let sumData = 0
+                    socket.onmessage = (e) => {
+                        msg = JSON.parse(e.data)
+                        if (msg.id !== 'data') return
+                        tFirstData = tFirstData || Date.now()
+                        const { samples } = msg
+
+                        series.forEach((nSeries, iChannel) => {
+                            const points = samples.map((sample) => ({
+                                x: sample.timestamp - dateOrigin.getTime(),
+                                y: sample.values[iChannel]
+                            }))
+                            nSeries.add(points)
+                            sumData += points.length
+                        })
+                    }
+
+                    setInterval(() => {
+                        const now = Date.now() - tFirstData
+                        const dataRate = sumData / (now / 1000)
+                        charts[0].setTitle(`Streaming web socket data | ${Math.round(dataRate)} points / second`)
+                    }, 1000)
+
+                }
+            }
+        }
+    </script>
+    
+</body>
+
+</html>
