@@ -5,7 +5,7 @@ Super compact test application of visualizing real-time data stream in a scrolli
 
 Creates **this** chart:
 
-![screenshot](chart.png)
+![screenshot](chart.png "Chart")
 
 With a **single** `HTML` file - no build or external content script required.
 
