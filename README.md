@@ -2,11 +2,11 @@
 
 Super compact test application of visualizing real-time data stream in a scrolling line chart with multiple channels.
 
-Creates **this** chart:
+A **single** `HTML` file - no build or external content script required...
+
+... creates **this** chart:
 
 ![screenshot](chart.jpg "Chart")
-
-With a **single** `HTML` file - no build or external content script required.
 
 Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchart-js/).
 
