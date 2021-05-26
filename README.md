@@ -1,11 +1,10 @@
-
 # Websocket real-time data visualization using LightningChart JS
 
 Super compact test application of visualizing real-time data stream in a scrolling line chart with multiple channels.
 
 Creates **this** chart:
 
-![screenshot](screenshot.jpg "Chart")
+![screenshot](chart.PNG "Chart")
 
 With a **single** `HTML` file - no build or external content script required.
 
@@ -14,8 +13,6 @@ Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchar
 The data is generated in a `Node.js` server and streamed with `WebSocket` to the client. WebSocket is really powerful for real-time data transferring - with my PC I easily streamed **300 000** data points every second and rendered it with `LCJS` with stable 60 FPS.
 
 This could also be optimized even further by using more efficient data formats (I used `JSON` strings for simplicity).
-
-
 
 ## Try it yourself
 
@@ -27,6 +24,7 @@ This could also be optimized even further by using more efficient data formats (
 
 ```bash
 cd server
+npm i
 npm i --global nodemon
 nodemon index.js
 ```
@@ -38,4 +36,5 @@ cd client
 npm i --global live-server
 live-server
 ```
+
 Client can be viewed by opening browser at `URL`: _localhost:8080_
