@@ -3,7 +3,7 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8081 });
 
 const timeDomain = 60 * 1000
-const dataRate = 1000 // Amount of data points per channel per 50 ms interval.
+const dataRate = 500 // Amount of data points per channel per 50 ms interval.
 
 const Channel = (opts) => Object.assign({
     name: 'Unnamed channel',
