@@ -16,8 +16,6 @@ This could also be optimized even further by using more efficient data formats (
 
 ## Try it yourself
 
-^ `nodemon` and `live-server` are used for hot-reload and hosting client/server.
-
 1. Install `Node.js`
 
 2. Start test server
@@ -25,8 +23,7 @@ This could also be optimized even further by using more efficient data formats (
 ```bash
 cd server
 npm i
-npm i --global nodemon
-nodemon index.js
+npm start
 ```
 
 3. Start client
