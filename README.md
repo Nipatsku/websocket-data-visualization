@@ -10,7 +10,7 @@ A **single** `HTML` file - no build or external content script required...
 
 Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchart-js/).
 
-The data is generated in a `Node.js` server and streamed with `WebSocket` to the client. WebSocket is really powerful for real-time data transferring - with my PC I easily streamed **300 000** data points every second and rendered it with `LCJS` with stable 60 FPS.
+The data is generated in a `Node.js` server and streamed with `WebSocket` to the client. WebSocket is really powerful for real-time data transferring - with my PC I easily streamed **300 000** data points every second and rendered it with stable 60 FPS by using `LCJS`.
 
 This could also be optimized even further by using more efficient data formats (I used `JSON` strings for simplicity).
 
