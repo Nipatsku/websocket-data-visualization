@@ -6,7 +6,7 @@ A **single** `HTML` file - no build or external content script required...
 
 ... creates **this** chart:
 
-![screenshot](capture.PNG "Chart")
+<img width="1915" alt="capture" src="https://user-images.githubusercontent.com/55391673/144894515-9d396a84-9ce1-48fd-a61a-e18d21800700.PNG">
 
 Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchart-js/).
 
@@ -16,7 +16,7 @@ I also tested this by hosting the server in USA, and testing the streaming to Fi
 
 The communication is highly optimized by packing all information to binary format. The below picture is a simplified structure presentation of each data message.
 
-![](data-packet.png)
+![data-packet](https://user-images.githubusercontent.com/55391673/144894546-146d9132-b5ab-4ebe-8227-c4369f6922f3.png)
 
 Packing communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
 
