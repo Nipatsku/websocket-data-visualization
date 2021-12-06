@@ -32,6 +32,7 @@
             SolidLine,
             AxisTickStrategies,
             AxisScrollStrategies,
+            synchronizeAxisIntervals
         } = lcjs
 
         const dateOrigin = new Date()
@@ -50,7 +51,7 @@
                 let msg = JSON.parse(e.data)
 
                 if (msg.id === 'info') {
-                    const { channels, timeDomain } = msg
+                    const { channels, xIntervalSeconds } = msg
                     const dashboard = lightningChart().Dashboard({
                         container: 'chart',
                         numberOfColumns: 1,
@@ -63,75 +64,97 @@
                             rowIndex: iChannel
                         })
                             .setTitle('')
-                            .setMouseInteractions(false)
                         if (iChannel > 0) chart.setTitleFillStyle(emptyFill)
 
                         const axisX = chart.getDefaultAxisX()
-                        if (iChannel < channels.length - 1)
-                            axisX
-                                .setTickStrategy(AxisTickStrategies.Empty)
-                                .setScrollStrategy(undefined)
-                                .setMouseInteractions(false)
-                        else
-                            axisX.setTickStrategy(AxisTickStrategies.DateTime, (ticks) => ticks
-                                .setDateOrigin(dateOrigin)
-                            )
+                            .setTickStrategy(AxisTickStrategies.Empty)
                             .setScrollStrategy(AxisScrollStrategies.progressive)
-                            .setInterval(-timeDomain, 0)
-                            .setTitle('Time domain')
+                            .setInterval(-xIntervalSeconds * channel.frequencyHz, 0)
 
                         const axisY = chart.getDefaultAxisY()
                         if ('name' in channel)
                             axisY
-                                .setTitle(channel.name)
+                                .setTitle(`${channel.name} ${channel.frequencyHz} Hz`)
                                 .setTitleFont((font) => font.setSize(10))
 
                         return chart
                     })
 
-                    charts[charts.length - 1].getDefaultAxisX().onScaleChange((start, end) => 
-                        charts.forEach((chart, iChannel) => {
-                            if (iChannel < charts.length - 1) {
-                                chart.getDefaultAxisX().setInterval(start, end, false, false)
-                            }
-                        })
-                    )
-
                     const series = charts.map((chart, iChannel) => {
                         const channel = channels[iChannel]
                         const nSeries = chart.addLineSeries({
                             dataPattern: {
-                                pattern: 'progressiveX',
+                                pattern: 'ProgressiveX',
+                                regularProgressiveStep: true,
                             }
                         })
-                            .setMaxPointCount(timeDomain * 2)
+                            .setDataCleaning({ minDataPointCount: 1 })
+                            .setStrokeStyle(stroke => stroke.setThickness(1))
                         if ('name' in channel) nSeries.setName(channel.name)
                         if ('color' in channel) nSeries.setStrokeStyle((style) => style.setFillStyle(new SolidFill({color: ColorHEX(channel.color)})))
                         return nSeries
                     })
 
                     let tFirstData
-                    let sumData = 0
-                    socket.onmessage = (e) => {
-                        msg = JSON.parse(e.data)
-                        if (msg.id !== 'data') return
-                        tFirstData = tFirstData || Date.now()
-                        const { samples } = msg
+                    let sumDataPoints = 0
+                    let sumCommunicationBytes = 0
+                    socket.onmessage = async (e) => {
+                        const blob = e.data
+                        sumCommunicationBytes += blob.size
+                        const arrayBuffer = await blob.arrayBuffer()
+                        let arrayBufferBytePos = 0
+                        // Read metadata bytes length as Uint16 at very start of binary message.
+                        const metadataLengthByteLength = 2
+                        const metaDataByteLength = new Uint16Array(arrayBuffer.slice(arrayBufferBytePos, arrayBufferBytePos + metadataLengthByteLength))[0]
+                        arrayBufferBytePos += metadataLengthByteLength
 
+                        // Read metadata as Uint8 array of known byte length.
+                        const metaDataBinary = new Uint8Array(arrayBuffer.slice(arrayBufferBytePos, arrayBufferBytePos + metaDataByteLength))
+                        arrayBufferBytePos += metaDataByteLength
+                        const metaDataString = String.fromCharCode.apply(null, metaDataBinary)
+                        const metaData = JSON.parse(metaDataString)
+
+                        // Read new sample values as Float32 with known new samples count per channel.
+                        // Start reading from nearest multiple of 4.
+                        arrayBufferBytePos = Math.ceil(arrayBufferBytePos / 4) * 4
+                        const channelsNewSamplesFloat32 = []
+                        metaData.channelNewSampleCountList.forEach((channelNewSamplesCount, iCh) => {
+                            const newSamplesByteLength = channelNewSamplesCount * Float32Array.BYTES_PER_ELEMENT
+                            channelsNewSamplesFloat32.push(new Float32Array(arrayBuffer.slice(arrayBufferBytePos, arrayBufferBytePos + newSamplesByteLength)))
+                            arrayBufferBytePos += newSamplesByteLength
+                        })
+
+                        tFirstData = tFirstData || Date.now()
                         series.forEach((nSeries, iChannel) => {
-                            const points = samples.map((sample) => ({
-                                x: sample.timestamp - dateOrigin.getTime(),
-                                y: sample.values[iChannel]
-                            }))
-                            nSeries.add(points)
-                            sumData += points.length
+                            const chNewValuesY = channelsNewSamplesFloat32[iChannel]
+                            nSeries.addArrayY(chNewValuesY)
+                            sumDataPoints += chNewValuesY.length
                         })
                     }
 
+                    let fps = 0
+                    ;(() => {
+                        let tStart = Date.now()
+                        let frames = 0
+                        const recordFrame = () => {
+                            frames++
+                            const tNow = Date.now()
+                            fps = 1000 / ((tNow - tStart) / frames)
+                            requestAnimationFrame(recordFrame)
+                        }
+                        requestAnimationFrame(recordFrame)
+
+                        setInterval(() => {
+                            tStart = Date.now()
+                            frames = 0
+                        }, 5000)
+                    })();
+
                     setInterval(() => {
                         const now = Date.now() - tFirstData
-                        const dataRate = sumData / (now / 1000)
-                        charts[0].setTitle(`Streaming web socket data | ${Math.round(dataRate)} points / second`)
+                        const dataPointsRate = sumDataPoints / (now / 1000)
+                        const commBytesRate = sumCommunicationBytes / (now / 1000)
+                        charts[0].setTitle(`Streaming web socket data | ${Math.round(dataPointsRate)} points / second | FPS: ${fps.toFixed(1)} | Bandwidth: ~${((commBytesRate / 1024).toFixed(0))} KB/s`)
                     }, 1000)
 
                 }
