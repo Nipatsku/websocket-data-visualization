@@ -18,7 +18,7 @@ The communication is highly optimized by packing all information to binary forma
 
 ![data-packet](https://user-images.githubusercontent.com/55391673/144894546-146d9132-b5ab-4ebe-8227-c4369f6922f3.png)
 
-Packing communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
+Binary communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
 
 ## Try it yourself
 
