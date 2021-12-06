@@ -6,13 +6,19 @@ A **single** `HTML` file - no build or external content script required...
 
 ... creates **this** chart:
 
-![screenshot](chart.jpg "Chart")
+![screenshot](screenshot.PNG "Chart")
 
 Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchart-js/).
 
-The data is generated in a `Node.js` server and streamed with `WebSocket` to the client. WebSocket is really powerful for real-time data transferring - with my PC I easily streamed **300 000** data points every second and rendered it with stable 60 FPS by using `LCJS`.
+The data is generated in a `Node.js` server and streamed with `WebSocket` to the client. WebSocket is really powerful for real-time data transferring - with my average PC I could easily stream **1 000 000** data points per second and rendered it with stable 60 FPS by using `LCJS`.
 
-This could also be optimized even further by using more efficient data formats (I used `JSON` strings for simplicity).
+I also tested this by hosting the server in USA, and testing the streaming to Finland, which still could handle 30 000 data points per second.
+
+The communication is highly optimized by packing all information to binary format. The below picture is a simplified structure presentation of each data message.
+
+![](dataformat.png)
+
+Packing communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
 
 ## Try it yourself
 
