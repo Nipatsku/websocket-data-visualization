@@ -7,10 +7,12 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
+    "ngrok": "^4.2.2",
     "nodemon": "^2.0.7"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "ngrok": "ngrok http 8081"
   },
   "author": "",
   "license": "ISC"
