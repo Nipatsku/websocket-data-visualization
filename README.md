@@ -20,6 +20,12 @@ The communication is highly optimized by packing all information to binary forma
 
 Binary communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
 
+To understand the benefit better, we can compare to the more traditional data transfer method - `JSON`, where all communication is done with UTF-8 encoded text.
+
+
+
+Quick testing in this scenario resulted in ~4 times less bandwidth usage with binary method. However, on top of this binary communication is simply more flexible in terms of bandwidth usage. For example, if data would be coming from an IoT sensor for example, 1 byte integers could be precise enough (rather than 4 byte floats) which would result in even 4 times less bandwidth usage.
+
 ## Try it yourself
 
 1. Install `Node.js`
