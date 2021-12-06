@@ -22,7 +22,7 @@ Binary communication is technically quite complex, but results in very efficient
 
 To understand the benefit better, we can compare to the more traditional data transfer method - `JSON`, where all communication is done with UTF-8 encoded text.
 
-
+![traditional-data-packet](https://user-images.githubusercontent.com/55391673/144898549-163b639b-926b-430f-8ca6-9c89fe40992a.png)
 
 Quick testing in this scenario resulted in ~4 times less bandwidth usage with binary method. However, on top of this binary communication is simply more flexible in terms of bandwidth usage. For example, if data would be coming from an IoT sensor for example, 1 byte integers could be precise enough (rather than 4 byte floats) which would result in even 4 times less bandwidth usage.
 
