@@ -84,10 +84,12 @@
                         const channel = channels[iChannel]
                         const nSeries = chart.addLineSeries({
                             dataPattern: {
-                                pattern: 'progressiveX',
+                                pattern: 'ProgressiveX',
+                                regularProgressiveStep: true,
                             }
                         })
                             .setDataCleaning({ minDataPointCount: 1 })
+                            .setStrokeStyle(stroke => stroke.setThickness(1))
                         if ('name' in channel) nSeries.setName(channel.name)
                         if ('color' in channel) nSeries.setStrokeStyle((style) => style.setFillStyle(new SolidFill({color: ColorHEX(channel.color)})))
                         return nSeries
