@@ -26,6 +26,8 @@ To understand the benefit better, we can compare to the more traditional data tr
 
 Quick testing in this scenario resulted in ~4 times less bandwidth usage with binary method. However, on top of this binary communication is simply more flexible in terms of bandwidth usage. For example, if data would be coming from an IoT sensor for example, 1 byte integers could be precise enough (rather than 4 byte floats) which would result in even 4 times less bandwidth usage.
 
+A previous version of this repository exists, which used `JSON`. This version can be viewed [here](https://github.com/Nipatsku/websocket-data-visualization/tree/json-version).
+
 ## Try it yourself
 
 1. Install `Node.js`
