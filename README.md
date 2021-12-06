@@ -6,7 +6,7 @@ A **single** `HTML` file - no build or external content script required...
 
 ... creates **this** chart:
 
-![screenshot](screenshot.PNG "Chart")
+![screenshot](capture.PNG "Chart")
 
 Chart is rendered with [LightningChart JS](https://www.arction.com/lightningchart-js/).
 
@@ -16,7 +16,7 @@ I also tested this by hosting the server in USA, and testing the streaming to Fi
 
 The communication is highly optimized by packing all information to binary format. The below picture is a simplified structure presentation of each data message.
 
-![](dataformat.png)
+![](data-packet.png)
 
 Packing communication is technically quite complex, but results in very efficient bandwidth usage - transferring 30000 data points / second uses approximately 120 kilobytes.
 
