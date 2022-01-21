@@ -2,6 +2,8 @@
 
 Super compact test application of visualizing real-time data stream in a scrolling line chart with multiple channels.
 
+Read more about the applications and context in this [short technical article](https://niilo-keinanen-93801.medium.com/real-time-data-visualization-with-websocket-79773edbf477).
+
 A **single** `HTML` file - no build or external content script required...
 
 ... creates **this** chart:
